@@ -1,0 +1,5 @@
+# os & temp files
+*~
+*.pyc
+.DS_Store
+Thumbs.db
