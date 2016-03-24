@@ -30,3 +30,4 @@ settings.py
 *.png
 *.mp3
 *.wav
+!requirements.txt
