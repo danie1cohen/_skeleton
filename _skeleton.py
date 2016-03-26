@@ -12,7 +12,8 @@ import os
 
 SCRIPT, PACKAGE_NAME = argv
 
-ORIGIN = u'_skeleton/_skeleton'
+PATH = u'_skeleton'
+ORIGIN = u'_skeleton'
 
 REPLACEMENTS = {
     u'_skeleton': PACKAGE_NAME,
@@ -21,39 +22,57 @@ REPLACEMENTS = {
     u'_download_url': u'dancohen.io'
 }
 
-def main(origin, package_name):
+def main():
     """
     Replicate the folder _skeleton and rename everything with the new package
     name
     """
-    print 'Creating package... %s ' % package_name
-    os.mkdir(package_name)
+    print 'Creating package... %s ' % PACKAGE_NAME
+    os.mkdir(PACKAGE_NAME)
 
-    for root, dirs, files in os.walk(origin):
+    for _, dirs, _ in os.walk(os.path.join(PATH, ORIGIN)):
         for dir_ in dirs:
-            dir_loc = os.path.join(
-                package_name, dir_.replace(origin, package_name)
-            )
-            os.mkdir(dir_loc)
-        for file_name in files:
-            if file_name == '.DS_Store':
-                continue
-            old_loc = os.path.join(root, file_name)
-            new_loc = old_loc.replace(origin, package_name)
-            print new_loc
-            old = open(old_loc, 'rb')
-            new = open(new_loc, 'wb')
-            for line in old:
-                for key in REPLACEMENTS:
-                    try:
-                        if key in line:
-                            line = line.replace(key, REPLACEMENTS[key])
-                    except UnicodeDecodeError:
-                        pass
-                new.write(line)
-            old.close()
-            new.close()
+            copy_dir(os.path.join(ORIGIN, dir_))
+
+    copy_files(ORIGIN)
+
     print 'Done!'
 
+def copy_dir(dir_):
+    # copies a dir and dirs within it.
+    dir_loc = dir_.replace(ORIGIN, PACKAGE_NAME)
+    print 'Creating directory... %s' % dir_loc
+    os.mkdir(dir_loc)
+
+    copy_files(dir_)
+
+
+def copy_files(dir_):
+    for root, dirs, files in os.walk(os.path.join(PATH, dir_)):
+        for file_name in files:
+            if file_name == '.DS_Store': continue
+
+            old_loc = os.path.join(PATH, os.path.join(dir_, file_name))
+            new_loc = os.path.join(dir_, file_name).replace(
+                os.path.basename(ORIGIN), PACKAGE_NAME
+                )
+            try:
+                old = open(old_loc, 'rb')
+            except IOError:
+                pass
+            else:
+                print 'Creating file... %s' % new_loc
+                new = open(new_loc, 'wb')
+                for line in old:
+                    for key in REPLACEMENTS:
+                        try:
+                            if key in line:
+                                line = line.replace(key, REPLACEMENTS[key])
+                        except UnicodeDecodeError:
+                            pass
+                    new.write(line)
+                old.close()
+                new.close()
+
 if __name__ == "__main__":
-    main(ORIGIN, PACKAGE_NAME)
+    main()
