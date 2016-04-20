@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 """
-This fab file is for deploying new code for the project to the machines wherein
-it is hosted.
+This fab file is for deploying new code and remotely managing the machines code
+is installed on.
 """
 from datetime import datetime
 
-from fabric.api import run, env, cd, prefix
+from fabric.api import run, env, cd, prefix, put, sudo
 
 env.host_string = 'administrator@gelsons'
 env.user = 'administrator'
-env.key_filename = r'U:\.ssh\id_rsa'
+env.key_filename = r'U:\.ssh\identity'
 
+def uname():
+    """
+    Gets the uname from the remote machine.
+    """
+    run('uname -s')
 
 def deploy():
     """Deploys new code and handles the commands that must follow"""
@@ -28,8 +33,22 @@ def deploy():
             replace = 'ln -sfn /opt/_skeleton/%s /opt/_skeleton/current'
             run(remove + ' && ' + replace % folder)
 
-def uname():
+def create():
     """
-    Gets the uname from the remote machine.
+    Does initial folder setup.
     """
-    run('uname')
+    put('_skeleton/settings.py')
+    sudo('mkdir /opt/_skeleton && chown administrator:administrator /opt/_skeleton')
+    with cd('/opt/_skeleton'), prefix('workon _skeleton'):
+        run('git clone git@deltaco:usc-cu/_skeleton.git initialdeployment')
+        run('ln -s /opt/_skeleton/initialdeployment /opt/_skeleton/current')
+        run('mv ~/settings.py /opt/_skeleton/current/_skeleton/settings.py')
+        run('pip install -r current/requirements.txt')
+
+def bootstrap():
+    """
+    Bootstrapping will install system dependencies (we leave python dependencies
+    to the deployment process, since they can change .
+    """
+    put('bootstrap.sh')
+    sudo('chmod +x bootstrap.sh && ./bootstrap.sh')
