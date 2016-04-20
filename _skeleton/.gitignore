@@ -8,6 +8,9 @@ Thumbs.db
 .vagrant
 __pycache__
 
+# ignore autoenv
+.env
+
 # logs
 *.log
 
