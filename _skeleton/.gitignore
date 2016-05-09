@@ -7,6 +7,7 @@ Thumbs.db
 .ipynb_checkpoints
 .vagrant
 __pycache__
+cover
 
 # ignore autoenv
 .env
@@ -33,4 +34,6 @@ settings.py
 *.png
 *.mp3
 *.wav
+*.csv
+*.tsv
 !requirements.txt
