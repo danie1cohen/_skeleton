@@ -14,31 +14,29 @@ env.host_string = 'administrator@gelsons'
 env.user = 'administrator'
 env.key_filename = 'U:\\.ssh\\id_rsa'
 
-REPO_URL = 'git@deltaco:usc-cu/_skeleton.git'
-INSTALL_PATH = '/opt/_skeleton'
+data = {
+    'install_path': '/opt/_skeleton',
+    'current': '/opt/_skeleton/current',
+    'repo': 'git@deltaco:usc-cu/_skeleton.git',
+    'build': datetime.now().strftime('%Y%m%d%H%M%S'),
+    'settings': '_skeleton/settings.py',
+    'user': env.user
+}
 
-
-def uname():
-    """
-    Gets the uname from the remote machine.
-    """
-    run('uname -s')
 
 def deploy():
     """Deploys new code and handles the commands that must follow"""
-    folder = datetime.now().strftime('%Y%m%d%H%M%S')
-    with cd(INSTALL_PATH):
-        run('git clone %s %s' % (REPO_URL, folder))
-        # copy the settings files over
-        run('cp current/_skeleton/settings.py %s/_skeleton/settings.py' % folder)
-        with cd(folder), prefix('workon _skeleton'):
+    with cd('%(install_path)s' % data):
+        run('git clone %(repo)s %(build)s' % data)
+        run('cp current/%(settings)s %(build)s/%(settings)s' % data)
+        with cd('%(build)s' % data), prefix('workon _skeleton'):
             run('pip install -U pip')
             run('pip install -r requirements.txt')
-            run('nosetests')
+            run('nosetests -v')
             # if tests pass, change symlink
-            remove = 'rm -rf /opt/_skeleton/current'
-            replace = 'ln -sfn /opt/_skeleton/%s /opt/_skeleton/current'
-            run(remove + ' && ' + replace % folder)
+            remove = 'rm -rf %(current)s' % data
+            replace = 'ln -sfn %(install_path)s/%(build)s %(current)s' % data
+            run(remove + ' && ' + replace)
     increment_version()
 
 def create():
@@ -46,30 +44,22 @@ def create():
     Does initial folder setup.
     """
     local('ssh-copy-id -i %s %s' % (env.key_filename, env.host_string))
-    put('_skeleton/settings.py')
-    sudo(
-        'mkdir %(path)s && chown %(user)s:%(user)s %(path)s' % {
-            'path': INSTALL_PATH,
-            'user':env.user
-            }
-        )
-    with cd(INSTALL_PATH), prefix('workon _skeleton'):
-        run('git clone %s initialdeployment' % GIT_REPO)
-        run('ln -s %s/initialdeployment %s/current' % (INSTALL_PATH,
-                                                       INSTALL_PATH))
-        run('mv ~/settings.py %s/current/_skeleton/settings.py' % INSTALL_PATH)
-        run('pip install -r current/requirements.txt')
-
-def bootstrap():
-    """
-    Bootstrapping will install system dependencies (we leave python dependencies
-    to the deployment process, since they can change .
-    """
-    put('bootstrap.sh')
-    sudo('chmod +x bootstrap.sh && ./bootstrap.sh')
+    put('%(settings)s' % data)
+    sudo('chmod 700 %(settings)s' % data)
+    sudo('mkdir %(install_path)s' % data)
+    sudo('chown -R %(user)s:%(user)s %(install_path)s' % data)
+    with cd('%(install_path)s' % data):
+        run('mkdir current')
+        run('mkvirtualenv _skeleton')
+        run('mv ~/settings.py %(current)s/%(settings)s' % data)
+    # set up log dir
+    sudo('mkdir /var/log/_skeleton')
+    sudo('chown -R %(user)s:%(user)s /var/log/_skeleton' % data)
+    deploy()
 
 def oneoff():
-    with cd(INSTALL_PATH + '/current'), prefix('workon _skeleton'):
+    """Run _skeleton as a one off process."""
+    with cd('%(current)s' % data), prefix('workon _skeleton'):
         run('python _skeleton/_skeleton.py')
 
 def increment_version():
@@ -93,5 +83,16 @@ def increment_last(line):
     vals[-1] = vals[-1] + 1
     version_plus = '.'.join([str(val) for val in vals])
     print('Incrementing setup.py to version: %s' % version_plus)
-    line = "%s: '%s',\n" % (key, version_plus)
-    return line
+    return "%s: '%s',\n" % (key, version_plus)
+
+def deployed_version():
+    """
+    Return the version of the current deployed code.
+    """
+    run('cat %(current)s/setup.py | grep -i version' % data)
+
+def uname():
+    """
+    Gets the uname from the remote machine.
+    """
+    run('uname -s')
