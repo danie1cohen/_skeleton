@@ -8,6 +8,7 @@ Thumbs.db
 .vagrant
 __pycache__
 cover
+.coverage
 
 # ignore autoenv
 .env
@@ -26,7 +27,8 @@ dist
 
 # conf
 settings.py
-.coverage
+settings.p
+
 
 # static
 *.txt
@@ -36,4 +38,5 @@ settings.py
 *.wav
 *.csv
 *.tsv
+*.xlsx
 !requirements.txt
