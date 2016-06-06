@@ -1,8 +1,10 @@
 #!/bin/bash
+export TZ=America/Los_Angeles
+export DEBIAN_FRONTEND=noninteractive
 
 apt-get update -q
 apt-get install -y build-essential libssl-dev libffi-dev python3-dev python3-pip
-apt-get install -y --no-install-recommends git
+apt-get install -y --no-install-recommends git-core
 
 pip3 install --upgrade pip
 pip3 install pyopenssl ndg-httpsclient pyasn1
@@ -20,9 +22,18 @@ else
     HOME_USER=`SUDO_USER`
 fi
 
-echo 'source "/usr/local/bin/virtualenvwrapper.sh"
-export WORKON_HOME="/opt/envs/"
-cd /vagrant' >> /home/$HOME_USER/.bash_profile
+echo "# display last command and log it to bootstrap file
+alias strap=\"history | tail -n2 | sed -n '1p'  | sed 's/^[0-9 ]*//' | sed 's/sudo //' >> /vagrant/bootstrap.sh\"
+
+# pip install and also update requirements.txt
+pipit() { pip install \"$1\" && pip freeze > /vagrant/requirements.txt; }
+
+# set up virtualenvs
+source \"/usr/local/bin/virtualenvwrapper.sh\"
+export WORKON_HOME=\"/opt/envs/\"
+
+# always cd to shared folder first
+cd /vagrant" >> /home/$HOME_USER/.bash_profile
 source /home/$HOME_USER/.bash_profile
 
 echo 'workon _skeleton' >> /home/$HOME_USER/.bash_profile
@@ -37,4 +48,4 @@ if [ -a "/vagrant" ]; then
     pip3 install -r requirements.txt
 fi
 
-chown -R $HOME_USER:$HOME_USER /opt
+chown -R $HOME_USER:$HOME_USER /opt /home/$HOME_USER/.bash_profile
