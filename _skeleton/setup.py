@@ -11,7 +11,7 @@ config = {
     'url': '_download_url',
     'download_url': '_download_url',
     'author_email': '_user_email',
-    'version': '0.1.0',
+    'version': '0.0.1',
     'install_requires': [],
     'packages': ['_skeleton'],
     'scripts': [],
