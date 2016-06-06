@@ -19,7 +19,7 @@ data = {
     'current': '/opt/_skeleton/current',
     'repo': 'git@deltaco:usc-cu/_skeleton.git',
     'build': datetime.now().strftime('%Y%m%d%H%M%S'),
-    'settings': '_skeleton/settings.py',
+    'settings': 'settings.p',
     'user': env.user
 }
 
@@ -51,7 +51,7 @@ def create():
     with cd('%(install_path)s' % data):
         run('mkdir current')
         run('mkvirtualenv _skeleton')
-        run('mv ~/settings.py %(current)s/%(settings)s' % data)
+        run('mv ~/%(settings)s %(current)s/%(settings)s' % data)
     # set up log dir
     sudo('mkdir /var/log/_skeleton')
     sudo('chown -R %(user)s:%(user)s /var/log/_skeleton' % data)
@@ -96,3 +96,8 @@ def uname():
     Gets the uname from the remote machine.
     """
     run('uname -s')
+
+def chmod_settings():
+    """Restrict file access for settings file."""
+    with cd(data['current']):
+        sudo('chmod 700 %(settings)s' % data)
