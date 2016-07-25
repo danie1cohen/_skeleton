@@ -2,9 +2,9 @@
 export TZ=America/Los_Angeles
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get -qq update
-apt-get -qqy install build-essential libssl-dev libffi-dev python3-dev python3-pip
-apt-get -qqy --no-install-recommends install git-core
+apt-get update  > /dev/null
+apt-get -y install build-essential libssl-dev libffi-dev python3-dev python3-pip  > /dev/null
+apt-get -y --no-install-recommends install git-core > /dev/null
 
 pip3 install -q --upgrade pip
 pip3 install -q pyopenssl ndg-httpsclient pyasn1
