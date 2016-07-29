@@ -1,26 +1,50 @@
 #! /usr/bin/env python
-"""
+"""_skeleton.py
+
 This module automates setting up a new python project with the usual package
 structure and whatever files you'd expect to be there.
 
 Based on Learn Python the Hard Way's skeleton chapter:
 http://learnpythonthehardway.org/book/ex46.html
+
+Usage:
+    _skeleton.py <package_name>
+    _skeleton.py rename <current_name> <new_name>
 """
-from sys import argv
 import os
+import shutil
+
+from docopt import docopt
 
 
-SCRIPT, PACKAGE_NAME = argv
+args = docopt(__doc__)
 
-PATH = u'_skeleton'
-ORIGIN = u'_skeleton'
+if args['rename']:
+    PACKAGE_NAME = args['<new_name>']
+    PATH = '.'
+    ORIGIN = args['<current_name>']
+    REPLACEMENTS = {args['<current_name>']: args['<new_name>']}
+else:
+    PACKAGE_NAME = args['<package_name>']
+    PATH = u'_skeleton'
+    ORIGIN = u'_skeleton'
+    REPLACEMENTS = {
+        u'_skeleton': PACKAGE_NAME,
+        u'_user_name': u'Dan Cohen',
+        u'_user_email': u'daniel.o.cohen@gmail.com',
+        u'_download_url': u'www.github.com/danie1cohen/_skeleton.git'
+    }
 
-REPLACEMENTS = {
-    u'_skeleton': PACKAGE_NAME,
-    u'_user_name': u'Dan Cohen',
-    u'_user_email': u'daniel.o.cohen@gmail.com',
-    u'_download_url': u'dancohen.io'
-}
+def hidden(path):
+    """Returns true if some meaningful part of the path begins with a dot."""
+    for part in path.split(os.path.sep):
+        if part == '.':
+            continue
+        elif part.startswith('.'):
+            return True
+        elif part == '__pycache__':
+            return True
+    return False
 
 def main():
     """
@@ -30,12 +54,22 @@ def main():
     print 'Creating package... %s ' % PACKAGE_NAME
     os.mkdir(PACKAGE_NAME)
 
-    for _, dirs, _ in os.walk(os.path.join(PATH, ORIGIN)):
+    source_dir = os.path.join(PATH, ORIGIN)
+
+    for root, dirs, _ in os.walk(source_dir):
+        if hidden(root):
+            continue
         for dir_ in dirs:
+            if hidden(dir_):
+                continue
+            print(root, dir_)
             copy_dir(os.path.join(ORIGIN, dir_))
 
     copy_files(ORIGIN)
-
+    git_dir = os.path.join(source_dir, '.git')
+    if os.path.exists(git_dir):
+        print('Copying git tree.')
+        shutil.copytree(git_dir, os.path.join(PACKAGE_NAME, '.git'))
     print 'Done!'
 
 def copy_dir(dir_):
@@ -49,6 +83,9 @@ def copy_dir(dir_):
 
 def copy_files(dir_):
     for root, dirs, files in os.walk(os.path.join(PATH, dir_)):
+        if hidden(root):
+            continue
+
         for file_name in files:
             if file_name == '.DS_Store': continue
 
