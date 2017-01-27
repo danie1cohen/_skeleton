@@ -28,6 +28,7 @@ dist
 # conf
 settings.py
 settings.p
+.imported_roles
 
 
 # static

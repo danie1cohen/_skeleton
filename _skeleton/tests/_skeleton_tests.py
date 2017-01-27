@@ -14,7 +14,7 @@ import _skeleton
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
-class Test_skeleton(object):
+class Test_Skeleton(object):
     def setup(self):
         print('SETUP!')
 
