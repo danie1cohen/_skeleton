@@ -1,0 +1,4 @@
+--- # group_vars/all.yml
+
+project: _skeleton
+workon_home: /opt/envs

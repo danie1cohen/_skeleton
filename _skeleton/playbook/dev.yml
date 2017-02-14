@@ -1,0 +1,6 @@
+--- # dev.yml
+
+- hosts: dev
+  roles:
+    - danie1cohen.virtualenv3
+    - _skeleton

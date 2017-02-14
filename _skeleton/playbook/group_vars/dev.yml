@@ -1,0 +1,4 @@
+--- # group_vars/dev.yml
+
+ansible_user: vagrant
+ansible_connection: local

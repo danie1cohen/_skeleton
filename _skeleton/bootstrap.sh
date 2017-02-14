@@ -9,5 +9,3 @@ apt-get -y install build-essential libssl-dev libffi-dev python-dev python-pip
 apt-get -y --no-install-recommends install git-core
 
 pip install ansible markupsafe
-
-ansible-galaxy install -r requirements.yml -p /vagrant/playbook/.imported_roles/ 
