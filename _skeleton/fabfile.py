@@ -1,65 +1,43 @@
 #!/usr/bin/env python
 """
-This fab file is for deploying new code and remotely managing the machines code
-is installed on.
+This fab file is for deploying new code and remotely managing already deployed
+code.
 """
 from __future__ import print_function
 import os
 from datetime import datetime
 
-from fabric.api import run, env, cd, prefix, put, sudo, local
+from fabric.api import *
 
 
-env.host_string = 'administrator@gelsons'
-env.user = 'administrator'
-env.key_filename = 'U:\\.ssh\\id_rsa'
-
-data = {
-    'install_path': '/opt/_skeleton',
-    'current': '/opt/_skeleton/current',
-    'repo': 'git@deltaco:usc-cu/_skeleton.git',
-    'build': datetime.now().strftime('%Y%m%d%H%M%S'),
-    'settings': 'settings.p',
-    'user': env.user
-}
+env.host_string = '_env_host_string'
+env.user = '_env_user'
+env.key_filename = '_env_key_filename'
+env.install_path = '/opt/_skeleton'
+env.current = '/opt/_skeleton/current'
+env.repo = '_download_url'
+env.build = datetime.now().strftime('%Y%m%d%H%M%S')
+env.settings = '_skeleton/settings.py'
 
 
 def deploy():
     """Deploys new code and handles the commands that must follow"""
-    with cd('%(install_path)s' % data):
-        run('git clone %(repo)s %(build)s' % data)
-        run('cp current/%(settings)s %(build)s/%(settings)s' % data)
-        with cd('%(build)s' % data), prefix('workon _skeleton'):
+    with cd('%(install_path)s' % env):
+        run('git clone %(repo)s %(build)s' % env)
+        run('cp current/%(settings)s %(build)s/%(settings)s' % env)
+        with cd('%(build)s' % env), prefix('workon _skeleton'):
             run('pip install -U pip')
             run('pip install -r requirements.txt')
             run('nosetests -v')
             # if tests pass, change symlink
-            remove = 'rm -rf %(current)s' % data
-            replace = 'ln -sfn %(install_path)s/%(build)s %(current)s' % data
+            remove = 'rm -rf %(current)s' % env
+            replace = 'ln -sfn %(install_path)s/%(build)s %(current)s' % env
             run(remove + ' && ' + replace)
     increment_version()
 
-def create():
-    """
-    Does initial folder setup.
-    """
-    local('ssh-copy-id -i %s %s' % (env.key_filename, env.host_string))
-    put('%(settings)s' % data)
-    sudo('chmod 700 %(settings)s' % data)
-    sudo('mkdir %(install_path)s' % data)
-    sudo('chown -R %(user)s:%(user)s %(install_path)s' % data)
-    with cd('%(install_path)s' % data):
-        run('mkdir current')
-        run('mkvirtualenv _skeleton')
-        run('mv ~/%(settings)s %(current)s/%(settings)s' % data)
-    # set up log dir
-    sudo('mkdir /var/log/_skeleton')
-    sudo('chown -R %(user)s:%(user)s /var/log/_skeleton' % data)
-    deploy()
-
 def oneoff():
     """Run _skeleton as a one off process."""
-    with cd('%(current)s' % data), prefix('workon _skeleton'):
+    with cd('%(current)s' % env), prefix('workon _skeleton'):
         run('python _skeleton/_skeleton.py')
 
 def increment_version():
@@ -89,7 +67,7 @@ def deployed_version():
     """
     Return the version of the current deployed code.
     """
-    run('cat %(current)s/setup.py | grep -i version' % data)
+    run('cat %(current)s/setup.py | grep -i version' % env)
 
 def uname():
     """
@@ -99,5 +77,5 @@ def uname():
 
 def chmod_settings():
     """Restrict file access for settings file."""
-    with cd(data['current']):
-        sudo('chmod 700 %(settings)s' % data)
+    with cd(env['current']):
+        sudo('chmod 700 %(settings)s' % env)
