@@ -2,7 +2,19 @@
 export TZ=America/Los_Angeles
 export DEBIAN_FRONTEND=noninteractive
 
-echo "cd /vagrant/" > /home/vagrant/.profile
+echo "
+# aliases
+alias provision=\"cd /vagrant/playbook && ansible-playbook dev.yml --vault-password-file ~/.vault\"
+alias deploy=\"cd /vagrant/playbook && ansible-playbook prod.yml --vault-password-file ~/.vault\"
+
+cd /vagrant/
+workon notifications" > /home/vagrant/.profile
+
+echo "rm ~/.vault
+rm /vagrant/playbook/*.retry " >> ~/.logout
+
+echo "source ~/.logout" >> ~/.bash_logout
+
 
 apt-get update
 apt-get -y install build-essential libssl-dev libffi-dev python-dev python-pip
