@@ -8,10 +8,12 @@ alias provision=\"cd /vagrant/playbook && ansible-playbook dev.yml --vault-passw
 alias deploy=\"cd /vagrant/playbook && ansible-playbook prod.yml --vault-password-file ~/.vault\"
 
 cd /vagrant/
-workon notifications" > /home/vagrant/.profile
+workon _skeleton" > /home/vagrant/.profile
 
-echo "rm ~/.vault
-rm /vagrant/playbook/*.retry " >> ~/.logout
+echo "# dev cleanup
+find ~/ -name .vault -exec rm {} \\;
+find / -name \"*.retry\" -exec rm {} \\;
+" >> ~/.logout
 
 echo "source ~/.logout" >> ~/.bash_logout
 
