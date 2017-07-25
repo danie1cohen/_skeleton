@@ -11,15 +11,17 @@ cd /vagrant/
 workon _skeleton" > /home/vagrant/.profile
 
 echo "# dev cleanup
-find ~/ -name .vault -exec rm {} \\;
-find / -name \"*.retry\" -exec rm {} \\;
-" >> ~/.logout
+find /home/vagrant/ -name .vault -exec rm {} \\;
+find /vagrant/ -name \"*.retry\" -exec rm {} \\;
+" >> /home/vagrant/.logout
 
 echo "source ~/.logout" >> ~/.bash_logout
 
 
 apt-get update
-apt-get -y install build-essential libssl-dev libffi-dev python-dev python-pip
+apt-get -y install vim tree build-essential libssl-dev libffi-dev python-dev python-pip
 apt-get -y --no-install-recommends install git-core
 
 pip install ansible markupsafe
+
+chown -R vagrant:vagrant /home/vagrant
