@@ -1,0 +1,6 @@
+--- # prod.yml
+
+- hosts: prod
+  roles:
+    - danie1cohen.virtualenv3
+    - _skeleton
