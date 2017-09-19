@@ -22,6 +22,6 @@ apt-get update
 apt-get -y install vim tree build-essential libssl-dev libffi-dev python-dev python-pip
 apt-get -y --no-install-recommends install git-core
 
-pip install ansible markupsafe
+pip install ansible==2.3.2 markupsafe
 
 chown -R vagrant:vagrant /home/vagrant
