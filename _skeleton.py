@@ -146,7 +146,7 @@ def copy_files(dir_, trim_leading=True):
             #print('new loc: %s' % new_loc)
             if os.path.exists(new_loc):
                 continue
-            with open(old_loc, 'r') as old, open(new_loc, 'w') as new:
+            with open(old_loc, 'r') as old, open(new_loc, 'w', newline='\n') as new:
                 print('Creating file... %s' % new_loc)
                 for line in old:
                     for key, val in REPLACEMENTS.items():
